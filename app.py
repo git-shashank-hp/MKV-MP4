@@ -3,8 +3,7 @@ import subprocess
 import os
 import tempfile
 
-# Hardcoded path to ffmpeg
-FFMPEG_PATH = r"C:\Users\user\Downloads\ffmpeg-7.1.1-essentials_build\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe"
+FFMPEG_PATH = "ffmpeg"
 
 def convert_mkv_to_mp4(input_path, output_path):
     command = [
