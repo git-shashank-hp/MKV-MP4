@@ -2,9 +2,9 @@ import streamlit as st
 import subprocess
 import os
 import tempfile
+import imageio_ffmpeg
 
-# Use ffmpeg from PATH (Streamlit Cloud runs on Linux)
-FFMPEG_PATH = "ffmpeg"
+FFMPEG_PATH = imageio_ffmpeg.get_ffmpeg_exe()
 
 def convert_mkv_to_mp4(input_path, output_path):
     command = [
