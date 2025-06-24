@@ -78,6 +78,7 @@ def convert_mkv_to_mp4(input_path, output_path):
         raise RuntimeError(f"FFmpeg error:\n{error_msg}")
 
 def main():
+    st.image("image.png")
     st.title("MKV to MP4 Converter")
 
     st.markdown('<div class="custom-text-label">Upload your MKV file:</div>', unsafe_allow_html=True)
