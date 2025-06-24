@@ -4,6 +4,62 @@ import os
 import tempfile
 import imageio_ffmpeg
 
+# --- Config ---
+st.set_page_config(layout="wide", page_title="MKV to MP4 Converter")
+
+# --- Style ---
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap');
+    html, body, [class*="css"] {
+        font-family: 'Nunito Sans', sans-serif !important;
+    }
+    .block-container {
+        padding-top: 3rem;
+    }
+    .custom-text-label {
+        font-size: 28px;
+        font-weight: bold;
+        color: #000000;
+        margin-bottom: 8px;
+    }
+    div.stButton > button {
+        background-color: #5378b3 !important;
+        color: white !important;
+        font-weight: bold !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.5rem 1.5rem !important;
+        font-size: 16px !important;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+    div.stButton > button:hover {
+        background-color: #405f91 !important;
+        cursor: pointer;
+    }
+    div.stDownloadButton > button {
+        background-color: #4CAF50 !important;
+        color: white !important;
+        font-weight: bold !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.5rem 1.5rem !important;
+        font-size: 16px !important;
+        width: 100%;
+        margin-top: 10px;
+        transition: background-color 0.3s ease;
+    }
+    div.stDownloadButton > button:hover {
+        background-color: #388E3C !important;
+        cursor: pointer;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 FFMPEG_PATH = imageio_ffmpeg.get_ffmpeg_exe()
 
 def convert_mkv_to_mp4(input_path, output_path):
@@ -13,110 +69,72 @@ def convert_mkv_to_mp4(input_path, output_path):
         "-c:v", "copy",
         "-c:a", "aac",
         "-strict", "experimental",
-        output_path
+        output_path,
     ]
     try:
-        result = subprocess.run(
-            command,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr.decode()
         raise RuntimeError(f"FFmpeg error:\n{error_msg}")
 
-# Page config
-st.set_page_config(page_title="MKV to MP4 Converter", layout="wide")
+def main():
+    st.title("MKV to MP4 Converter")
 
-# --- Custom CSS to style buttons and label ---
-st.markdown("""
-    <style>
-    /* Style for all Streamlit buttons */
-    .stButton > button {
-        background-color: #1f77b4;
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 5px;
-        padding: 0.5em 1em;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    .stButton > button:hover {
-        background-color: #155d8b;
-    }
-    /* Style for download button */
-    .stDownloadButton > button {
-        background-color: #2ca02c;
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 5px;
-        padding: 0.5em 1em;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    .stDownloadButton > button:hover {
-        background-color: #1f7a1f;
-    }
-    /* Upload label font size */
-    .custom-upload-label {
-        font-size: 25px !important;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-    </style>
-""", unsafe_allow_html=True)
+    st.markdown('<div class="custom-text-label">Upload your MKV file:</div>', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("", type=["mkv"], label_visibility="collapsed")
 
-# --- UI ---
-# Replace "image.png" with your own image or comment this out if not using any image
-st.image("image.png")
+    if uploaded_file:
+        st.write(f"📄 File ready: **{uploaded_file.name}**")
 
-st.markdown('<label class="custom-upload-label">Upload your MKV file</label>', unsafe_allow_html=True)
-uploaded_file = st.file_uploader("📥 Please upload an MKV file to enable conversion", type=["mkv"])
+        convert_clicked = st.button("Convert to MP4")
 
-if uploaded_file:
-    st.write(f"📄 File ready: **{uploaded_file.name}**")
-
-    convert_clicked = st.button("Convert to MP4")
-
-    if convert_clicked:
-        temp_input_path = None
-        output_path = None
-        try:
-            # Save uploaded MKV file to temp location
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mkv") as temp_input:
-                temp_input.write(uploaded_file.read())
-                temp_input_path = temp_input.name
-
-            # Define output path with .mp4 extension
-            output_path = temp_input_path.rsplit('.', 1)[0] + ".mp4"
-
-            with st.spinner("Converting..."):
-                convert_mkv_to_mp4(temp_input_path, output_path)
-
-            st.success("✅ Conversion completed!")
-
-            # Offer download button for MP4
-            with open(output_path, "rb") as f:
-                st.download_button(
-                    label="Download MP4",
-                    data=f,
-                    file_name=f"{uploaded_file.name.rsplit('.', 1)[0]}.mp4",
-                    mime="video/mp4",
-                )
-
-        except Exception as e:
-            st.error(f"❌ Error: {e}")
-
-        finally:
-            # Clean up temp files safely
+        if convert_clicked:
+            temp_input_path = None
+            output_path = None
             try:
-                if temp_input_path and os.path.exists(temp_input_path):
-                    os.remove(temp_input_path)
-                if output_path and os.path.exists(output_path):
-                    os.remove(output_path)
-            except Exception:
-                pass
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".mkv") as temp_input:
+                    temp_input.write(uploaded_file.read())
+                    temp_input_path = temp_input.name
+
+                output_path = temp_input_path.rsplit(".", 1)[0] + ".mp4"
+
+                with st.spinner("Converting..."):
+                    convert_mkv_to_mp4(temp_input_path, output_path)
+
+                st.success("✅ Conversion completed!")
+
+                with open(output_path, "rb") as f:
+                    st.download_button(
+                        label="Download MP4",
+                        data=f,
+                        file_name=f"{uploaded_file.name.rsplit('.', 1)[0]}.mp4",
+                        mime="video/mp4",
+                    )
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
+            finally:
+                try:
+                    if temp_input_path and os.path.exists(temp_input_path):
+                        os.remove(temp_input_path)
+                    if output_path and os.path.exists(output_path):
+                        os.remove(output_path)
+                except Exception:
+                    pass
+
+    # Horizontal separator
+    st.markdown("---")
+
+    # Footer with author and Streamlit link
+    col_left, col_right = st.columns([8, 2])
+    with col_left:
+        st.markdown("**Built by Shashank H P**", unsafe_allow_html=True)
+    with col_right:
+        st.markdown(
+            '<div style="text-align: right;">Powered by '
+            '<a href="https://streamlit.io" target="_blank" '
+            'style="color: #5378b3; font-weight: bold; text-decoration: none;">Streamlit</a></div>',
+            unsafe_allow_html=True,
+        )
+
+if __name__ == "__main__":
+    main()
