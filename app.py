@@ -3,7 +3,9 @@ import subprocess
 import os
 import tempfile
 
-FFMPEG_PATH = "ffmpeg"
+import ffmpeg_static
+
+FFMPEG_PATH = ffmpeg_static.get_ffmpeg_path()
 
 def convert_mkv_to_mp4(input_path, output_path):
     command = [
