@@ -3,9 +3,8 @@ import subprocess
 import os
 import tempfile
 
-import ffmpeg_static
-
-FFMPEG_PATH = ffmpeg_static.get_ffmpeg_path()
+# Use ffmpeg from PATH (Streamlit Cloud runs on Linux)
+FFMPEG_PATH = "ffmpeg"
 
 def convert_mkv_to_mp4(input_path, output_path):
     command = [
@@ -24,7 +23,6 @@ def convert_mkv_to_mp4(input_path, output_path):
             stderr=subprocess.PIPE,
         )
     except subprocess.CalledProcessError as e:
-        # Decode ffmpeg error message and raise
         error_msg = e.stderr.decode()
         raise RuntimeError(f"FFmpeg error:\n{error_msg}")
 
@@ -73,7 +71,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- UI ---
-st.image("image.png")
+# Replace "image.png" with your own image or comment this out if not using any image
+# st.image("image.png")
+
 st.markdown('<label class="custom-upload-label">Upload your MKV file</label>', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("📥 Please upload an MKV file to enable conversion", type=["mkv"])
 
@@ -120,5 +120,3 @@ if uploaded_file:
                     os.remove(output_path)
             except Exception:
                 pass
-# End of app.py
-# This code is a Streamlit app that allows users to upload an MKV file and convert it to MP4 using FFmpeg.
