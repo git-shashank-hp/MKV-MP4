@@ -72,7 +72,7 @@ st.markdown("""
 
 # --- UI ---
 # Replace "image.png" with your own image or comment this out if not using any image
-# st.image("image.png")
+st.image("image.png")
 
 st.markdown('<label class="custom-upload-label">Upload your MKV file</label>', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("📥 Please upload an MKV file to enable conversion", type=["mkv"])
